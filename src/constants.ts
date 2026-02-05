@@ -3,4 +3,4 @@ export const Constants = {
     OpkomstRange: "Opkomsten!A1:J1000",
     LeidingRange: "'Leiding en Ondersteuning'!A1:E50",
     VerkennerRange: "Verkenners!A1:D100"
-}
+};

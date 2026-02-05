@@ -16,10 +16,10 @@ export const getOpkomsten = async (auth: OAuth2Client, history: true) => {
     if (!history) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        normalized = normalized.filter(n => n.Op && n.Op > yesterday)
+        normalized = normalized.filter(n => n.Op && n.Op > yesterday);
     }
     return normalized;
-}
+};
 
 export const getLeiding = async (auth: OAuth2Client) => {
     const sheets = google.sheets({ version: 'v4', auth });
@@ -31,14 +31,14 @@ export const getLeiding = async (auth: OAuth2Client) => {
     });
     const rows = response.data.values ?? [];
     return normalizeLeiding(rows.slice(1));
-}
+};
 export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
     const sheets = google.sheets({ version: 'v4', auth });
-    const { OpkomstId, Op, Tot, Omschrijving = "", Opmerkingen = "", StuurmanVanDeDag: { Naam: stuurmanNaam }, LeidingAanwezig = [], LeidingAfwezig = [], VerkennerAfwezig = [] } = opkomst;
+    const { OpkomstId, Op, Tot, Omschrijving = "", Opmerkingen = "", StuurmanVanDeDag: { Naam: stuurmanNaam }, LeidingAanwezig = [], LeidingAfwezig = [], VerkennerAfwezig = [], EerderWeg = [] } = opkomst;
     const aanwezigeLeiding = LeidingAanwezig?.map(l => l.Naam).join(", ");
     const afwezigeLeiding = LeidingAfwezig?.map(l => l.Naam).join(", ");
     const afwezigeVerkenners = VerkennerAfwezig?.map(v => v.Naam).join(", ");
-    console.log({afwezigeVerkenners})
+    const eerderWegVerkenners =  EerderWeg?.map(v => v.Naam).join(", ");
     try {
         const rowNumber = OpkomstId;
         const updated = await sheets.spreadsheets.values.update({
@@ -46,7 +46,7 @@ export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
             range: `Opkomsten!A${rowNumber}:Z${rowNumber}`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
-                values: [[dateToSerial(Op), dateToSerial(Tot), Omschrijving, Opmerkingen, stuurmanNaam, aanwezigeLeiding, afwezigeLeiding, afwezigeVerkenners]],
+                values: [[dateToSerial(Op), dateToSerial(Tot), Omschrijving, Opmerkingen, stuurmanNaam, aanwezigeLeiding, afwezigeLeiding, afwezigeVerkenners, eerderWegVerkenners]],
             },
         });
         return updated;
@@ -82,11 +82,11 @@ const serialToDateUTC = (serial: number): Date => {
     const ms = Math.round(serial * 24 * 60 * 60 * 1000);
     const epoch = Date.UTC(1899, 11, 30); // months are 0-based
     return new Date(epoch + ms);
-}
+};
 
 const dateToSerial = (date: Date|undefined): number| string => {
     if (!date) {
-        return ""
+        return "";
     }
     if (typeof date === "string") {
         date = new Date(date);
@@ -96,6 +96,7 @@ const dateToSerial = (date: Date|undefined): number| string => {
     return diffMs / (24 * 60 * 60 * 1000);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeOpkomsten = (rows: any[][]): Opkomst[] => {
     return rows.map<Opkomst>((row, index) => {
         return {
@@ -111,8 +112,9 @@ const normalizeOpkomsten = (rows: any[][]): Opkomst[] => {
             EerderWeg: (row[8] as string)?.split(',').map(l => ({ Naam: l.trim() })) || [],
         } as Opkomst;
     });
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeLeiding = (rows: any[][]): Leiding[] => {
     return rows.map<Leiding> ((row, index) => {
         return {
@@ -122,9 +124,9 @@ const normalizeLeiding = (rows: any[][]): Leiding[] => {
             CWO: row[2].trim(),
             Ketelmeer: row[3],
             Sleper: row[4]
-        }
+        };
     }).filter(f => f.Naam.trim().length > 0);
-}
+};
 export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
 
@@ -135,8 +137,9 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
     });
     const rows = response.data.values ?? [];
     return normalizeVerkenner(rows.slice(1));
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
     return rows.map<Verkenner> ((row, index) => {
         return {
@@ -145,7 +148,7 @@ const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
             Functie: row[1].trim(),
             CWO: row[2].trim(),
             Vlet: row[3].trim()
-        }
+        };
     }).filter(f => f.Naam.trim().length > 0);
-}
+};
 
