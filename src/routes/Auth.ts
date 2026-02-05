@@ -32,7 +32,6 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
     const { code } = req.body;
-    console.log({code});
     if (!code) {
         res.status(500).json({ error: 'Fout bij vernieuwen van token' });
     }

@@ -49,11 +49,18 @@ router.get('/:rowIndex', async (req, res) => {
     }
     const { rowIndex } = req.params;
     try {
-        res.status(200).json(await getOpkomst(req.auth, parseInt(rowIndex)));
+        const opkomstId = parseInt(rowIndex);
+        if (0 > opkomstId) {
+            res.status(200).json(await spreadSheetService.getNextOpkomst(req.auth));
+        } else {
+            res.status(200).json(await getOpkomst(req.auth, opkomstId));
+        }
     } catch {
         res.status(500).json({ error: 'Fout bij laden van opkomst' });
     }
 });
+
+
 
 
 export default router;

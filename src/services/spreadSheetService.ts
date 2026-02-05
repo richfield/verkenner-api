@@ -12,13 +12,28 @@ export const getOpkomsten = async (auth: OAuth2Client, history: true) => {
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
     const rows = response.data.values ?? [];
-    let normalized: Opkomst[] = normalizeOpkomsten(rows.slice(1));
+    let normalized: Opkomst[] = normalizeOpkomsten(rows.slice(2));
     if (!history) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         normalized = normalized.filter(n => n.Op && n.Op > yesterday);
     }
     return normalized;
+};
+
+export const getNextOpkomst = async (auth: OAuth2Client) => {
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.OpkomstRange,
+        valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
+    });
+    const rows = response.data.values ?? [];
+    const normalized: Opkomst[] = normalizeOpkomsten(rows.slice(1));
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return normalized.find(n => n.Op && n.Op > yesterday);
 };
 
 export const getLeiding = async (auth: OAuth2Client) => {
@@ -38,7 +53,7 @@ export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
     const aanwezigeLeiding = LeidingAanwezig?.map(l => l.Naam).join(", ");
     const afwezigeLeiding = LeidingAfwezig?.map(l => l.Naam).join(", ");
     const afwezigeVerkenners = VerkennerAfwezig?.map(v => v.Naam).join(", ");
-    const eerderWegVerkenners =  EerderWeg?.map(v => v.Naam).join(", ");
+    const eerderWegVerkenners = EerderWeg?.map(v => v.Naam).join(", ");
     try {
         const rowNumber = OpkomstId;
         const updated = await sheets.spreadsheets.values.update({
@@ -84,7 +99,7 @@ const serialToDateUTC = (serial: number): Date => {
     return new Date(epoch + ms);
 };
 
-const dateToSerial = (date: Date|undefined): number| string => {
+const dateToSerial = (date: Date | undefined): number | string => {
     if (!date) {
         return "";
     }
@@ -116,7 +131,7 @@ const normalizeOpkomsten = (rows: any[][]): Opkomst[] => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeLeiding = (rows: any[][]): Leiding[] => {
-    return rows.map<Leiding> ((row, index) => {
+    return rows.map<Leiding>((row, index) => {
         return {
             LeidingId: index + 2,
             Naam: row[0].trim(),
@@ -141,7 +156,7 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
-    return rows.map<Verkenner> ((row, index) => {
+    return rows.map<Verkenner>((row, index) => {
         return {
             VerkennerId: index + 2,
             Naam: row[0].trim(),
