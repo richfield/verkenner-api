@@ -52,7 +52,6 @@ router.post('/login', async (req: Request, res: Response) => {
             }),
         });
         const tokenData = await tokenResponse.json() as TokenData;
-        console.log({tokenResponse, tokenData});
         res.json({ ...tokenData });
     } catch (error) {
         console.error('Fout bij vernieuwen van token:', error);
