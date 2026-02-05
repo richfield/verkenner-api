@@ -31,8 +31,6 @@ jobs:
     - name: Copy files to deployment directory
       run: |
         cp -R ${{ github.workspace }}/dist/* /docker-config/verkennerApi/
-        mkdir -p /docker-config/verkennerApi/public
-        cp -R ${{ github.workspace }}/public/* /docker-config/verkennerApi/public/
         cp ${{ github.workspace }}/package.json /docker-config/verkennerApi/
 
 
