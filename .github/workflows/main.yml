@@ -1,0 +1,40 @@
+name: Deploy ReceptenApi
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the project
+      run: npm run build
+
+    - name: Copy files to deployment directory
+      run: |
+        cp -R ${{ github.workspace }}/dist/* /docker-config/verkennerApi/
+        mkdir -p /docker-config/verkennerApi/public
+        cp -R ${{ github.workspace }}/public/* /docker-config/verkennerApi/public/
+        cp ${{ github.workspace }}/package.json /docker-config/verkennerApi/
+
+
+    - name: Restart Service
+      run: docker compose -f /docker-config/verkennerApi/compose.yml up -d --force-recreate --build
