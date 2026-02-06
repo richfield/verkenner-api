@@ -7,7 +7,6 @@ const router = express.Router();
 
 router.post('/refresh-token', async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
-
     if (!refreshToken) {
         return res.status(400).json({ error: 'Refresh token is vereist' });
     }
@@ -21,7 +20,6 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
         oauth2Client.setCredentials({
             refresh_token: refreshToken,
         });
-
         const { credentials } = await oauth2Client.refreshAccessToken();
         res.json({ accessToken: credentials.access_token });
     } catch (error) {

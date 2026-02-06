@@ -17,7 +17,7 @@ export const authenticate = async (
   next: NextFunction
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<void | express.Response<any, Record<string, any>>> => {
-  if (req.path.startsWith('/api/auth/login')) {
+  if (req.path.startsWith('/api/auth')) {
     return next();
   }
   const token = req.headers.authorization?.split('Bearer ')[1];
