@@ -12,7 +12,7 @@ export const getOpkomsten = async (auth: OAuth2Client, history: true) => {
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
     const rows = response.data.values ?? [];
-    let normalized: Opkomst[] = normalizeOpkomsten(rows.slice(2));
+    let normalized: Opkomst[] = normalizeOpkomsten(rows.slice(1));
     if (!history) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
