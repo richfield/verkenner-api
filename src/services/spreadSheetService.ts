@@ -156,14 +156,14 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
-    return rows.map<Verkenner>((row, index) => {
+    return rows.filter(row => typeof row[0] === "string" && row[0].trim().length > 0).map<Verkenner>((row, index) => {
         return {
             VerkennerId: index + 2,
             Naam: row[0].trim(),
-            Functie: row[1].trim(),
-            CWO: row[2].trim(),
-            Vlet: row[3].trim()
+            Functie: typeof row[1] === "string" ? row[1].trim() : "",
+            CWO: typeof row[2] === "string" ? row[2].trim() : "",
+            Vlet: typeof row[3] === "string" ? row[3].trim() : ""
         };
-    }).filter(f => f.Naam.trim().length > 0);
+    });
 };
 
