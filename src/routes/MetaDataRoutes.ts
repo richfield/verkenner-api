@@ -26,8 +26,9 @@ router.get('/verkenners', async (req, res) => {
     }
     try {
         res.status(200).json(await spreadSheetService.getVerkenners(req.auth));
-    } catch {
-        res.status(500).json({ error: 'Fout bij laden van opkomst' });
+    } catch (error) {
+        console.error('Fout bij laden van verkenners:', error);
+        res.status(500).json({ error: 'Fout bij laden van verkenners' });
     }
 });
 

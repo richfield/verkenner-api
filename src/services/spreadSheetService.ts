@@ -49,8 +49,7 @@ export const getLeiding = async (auth: OAuth2Client) => {
 };
 export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
     const sheets = google.sheets({ version: 'v4', auth });
-    const { OpkomstId, Op, Tot, Omschrijving = "", Opmerkingen = "", StuurmanVanDeDag: { Naam: stuurmanNaam }, LeidingAanwezig = [], LeidingAfwezig = [], VerkennerAfwezig = [], EerderWeg = [] } = opkomst;
-    const aanwezigeLeiding = LeidingAanwezig?.map(l => l.Naam).join(", ");
+    const { OpkomstId, Op, Tot, Omschrijving = "", Opmerkingen = "", StuurmanVanDeDag: { Naam: stuurmanNaam }, LeidingAfwezig = [], VerkennerAfwezig = [], EerderWeg = [] } = opkomst;
     const afwezigeLeiding = LeidingAfwezig?.map(l => l.Naam).join(", ");
     const afwezigeVerkenners = VerkennerAfwezig?.map(v => v.Naam).join(", ");
     const eerderWegVerkenners = EerderWeg?.map(v => v.Naam).join(", ");
@@ -58,10 +57,10 @@ export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
         const rowNumber = OpkomstId;
         const updated = await sheets.spreadsheets.values.update({
             spreadsheetId: Constants.VerkennersSpreadSheetId,
-            range: `Opkomsten!A${rowNumber}:Z${rowNumber}`,
+            range: `'${Constants.OpkomstSheetName}'!A${rowNumber}:Z${rowNumber}`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
-                values: [[dateToSerial(Op), dateToSerial(Tot), Omschrijving, Opmerkingen, stuurmanNaam, aanwezigeLeiding, afwezigeLeiding, afwezigeVerkenners, eerderWegVerkenners]],
+                values: [[dateToSerial(Op), dateToSerial(Tot), Omschrijving, Opmerkingen, stuurmanNaam, afwezigeLeiding, afwezigeVerkenners, eerderWegVerkenners]],
             },
         });
         return updated;
@@ -77,7 +76,7 @@ export const getOpkomst = async (auth: OAuth2Client, opkomstId: number) => {
         const rowNumber = opkomstId;
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: Constants.VerkennersSpreadSheetId,
-            range: `Opkomsten!A${rowNumber}:Z${rowNumber}`,
+            range: `'${Constants.OpkomstSheetName}'!A${rowNumber}:Z${rowNumber}`,
             valueRenderOption: 'UNFORMATTED_VALUE'
         });
         const rows = response.data.values ?? [];
@@ -121,10 +120,10 @@ const normalizeOpkomsten = (rows: any[][]): Opkomst[] => {
             Omschrijving: row[2],
             Opmerkingen: row[3],
             StuurmanVanDeDag: { Naam: row[4] },
-            LeidingAanwezig: (row[5] as string)?.split(',').map<Leiding>(l => ({ Naam: l.trim() })) || [],
-            LeidingAfwezig: (row[6] as string)?.split(',').map(l => ({ Naam: l.trim() })) || [],
-            VerkennerAfwezig: (row[7] as string)?.split(',').map(l => ({ Naam: l.trim() })) || [],
-            EerderWeg: (row[8] as string)?.split(',').map(l => ({ Naam: l.trim() })) || [],
+            LeidingAanwezig: [],
+            LeidingAfwezig: (row[5] as string)?.split(',').map<Leiding>(l => ({ Naam: l.trim() })) || [],
+            VerkennerAfwezig: (row[6] as string)?.split(',').map<Verkenner>(l => ({ Naam: l.trim(), VerkennerId: 0, Vlet: "" })) || [],
+            EerderWeg: (row[7] as string)?.split(',').map<Verkenner>(l => ({ Naam: l.trim(), VerkennerId: 0, Vlet: "" })) || [],
         } as Opkomst;
     });
 };
