@@ -38,7 +38,7 @@ router.post('/incidents', async (req, res) => {
     try {
         const result = await spreadSheetService.addUniformIncident(req.auth, {
             Datum: new Date(date),
-            VerkennerNaam: verkennerNamen.map(name => name.trim()).join(', '),
+            VerkennerNaam: verkennerNamen.map(name => name.trim()).join(','),
             Type: type,
         });
         res.status(201).json({ success: true, updatedRange: result.data.updatedRange });
