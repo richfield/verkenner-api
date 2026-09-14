@@ -7,5 +7,5 @@ export const Constants = {
     IncidentSheetName: "Uniform vergeten/te laat",
     IncidentRange: "'Uniform vergeten/te laat'!A1:C1000",
     TraktatieSheetName: "Traktatie",
-    TraktatieRange: "'Traktatie'!A1:E1000"
+    TraktatieRange: "'Traktatie'!D1:H1000"
 };

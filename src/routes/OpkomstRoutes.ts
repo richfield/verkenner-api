@@ -64,7 +64,8 @@ router.get('/traktaties', async (req, res) => {
     }
     try {
         res.status(200).json(await spreadSheetService.getTraktaties(req.auth));
-    } catch {
+    } catch (error) {
+        console.error('Fout bij laden van traktaties:', error);
         res.status(500).json({ error: 'Fout bij laden van traktaties' });
     }
 });

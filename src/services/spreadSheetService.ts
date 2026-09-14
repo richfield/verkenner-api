@@ -161,7 +161,7 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
         valueInputOption: 'USER_ENTERED',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
-            values: [[incident.Datum, incident.VerkennerNaam, incident.Type]],
+            values: [[dateToSerial(incident.Datum), incident.VerkennerNaam, incident.Type]],
         },
     });
 };
@@ -217,7 +217,7 @@ export const markTraktatieDone = async (auth: OAuth2Client, rowNumber: number, d
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!D${rowNumber}`,
+        range: `'${Constants.TraktatieSheetName}'!G${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[done]] },
     });
