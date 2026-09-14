@@ -223,16 +223,18 @@ export const markTraktatieDone = async (auth: OAuth2Client, rowNumber: number, d
     });
 };
 
-export const addTraktatie = async (auth: OAuth2Client, verkennerNaam: string) => {
+export const resetTraktatie = async (auth: OAuth2Client, verkennerNaam: string) => {
     const sheets = google.sheets({ version: 'v4', auth });
-    return sheets.spreadsheets.values.append({
+    const traktaties = await getTraktaties(auth);
+    const traktatie = traktaties.find(item => item.VerkennerNaam === verkennerNaam);
+    if (!traktatie) {
+        throw new Error(`Geen traktatieregel gevonden voor ${verkennerNaam}`);
+    }
+    return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!D:H`,
+        range: `'${Constants.TraktatieSheetName}'!G${traktatie.RowNumber}`,
         valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        requestBody: {
-            values: [[verkennerNaam, 0, 3, false, 0]],
-        },
+        requestBody: { values: [[false]] },
     });
 };
 

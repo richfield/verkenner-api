@@ -95,7 +95,7 @@ router.post('/traktaties', async (req, res) => {
         return res.status(400).json({ error: 'Ongeldige verkenner' });
     }
     try {
-        await spreadSheetService.addTraktatie(req.auth, verkennerNaam.trim());
+        await spreadSheetService.resetTraktatie(req.auth, verkennerNaam.trim());
         res.status(201).json({ success: true });
     } catch {
         res.status(500).json({ error: 'Fout bij toevoegen van traktatie' });
