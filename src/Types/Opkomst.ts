@@ -28,6 +28,6 @@ export type Traktatie = {
     VerkennerNaam: string;
     AantalKeerVergeten: number;
     KerenOver: number;
-    Getrakteerd: boolean;
+    Getrakteerd: number;
     Aantal: number;
 };

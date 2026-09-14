@@ -207,19 +207,24 @@ export const getTraktaties = async (auth: OAuth2Client): Promise<Traktatie[]> =>
             VerkennerNaam: name,
             AantalKeerVergeten: Number(row[1]) || 0,
             KerenOver: Number(row[2]) || 0,
-            Getrakteerd: row[3] === true || row[3] === 'TRUE',
+            Getrakteerd: typeof row[3] === 'number' ? row[3] : row[3] === true || row[3] === 'TRUE' ? 1 : 0,
             Aantal: Number(row[4]) || 0,
         }];
     });
 };
 
-export const markTraktatieDone = async (auth: OAuth2Client, rowNumber: number, done: boolean) => {
+export const incrementTraktatie = async (auth: OAuth2Client, rowNumber: number) => {
     const sheets = google.sheets({ version: 'v4', auth });
+    const traktaties = await getTraktaties(auth);
+    const traktatie = traktaties.find(item => item.RowNumber === rowNumber);
+    if (!traktatie) {
+        throw new Error(`Geen traktatieregel gevonden voor rij ${rowNumber}`);
+    }
     return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
         range: `'${Constants.TraktatieSheetName}'!G${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[done]] },
+        requestBody: { values: [[traktatie.Getrakteerd + 1]] },
     });
 };
 

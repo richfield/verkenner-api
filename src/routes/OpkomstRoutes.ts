@@ -75,11 +75,11 @@ router.put('/traktaties/:rowNumber', async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     const rowNumber = Number(req.params.rowNumber);
-    if (!Number.isInteger(rowNumber) || rowNumber < 2 || typeof req.body.done !== 'boolean') {
+    if (!Number.isInteger(rowNumber) || rowNumber < 2) {
         return res.status(400).json({ error: 'Ongeldige traktatiegegevens' });
     }
     try {
-        await spreadSheetService.markTraktatieDone(req.auth, rowNumber, req.body.done);
+        await spreadSheetService.incrementTraktatie(req.auth, rowNumber);
         res.status(200).json({ success: true });
     } catch {
         res.status(500).json({ error: 'Fout bij opslaan van traktatie' });
