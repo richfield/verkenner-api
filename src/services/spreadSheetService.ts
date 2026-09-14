@@ -155,11 +155,19 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
 
 export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIncident) => {
     const sheets = google.sheets({ version: 'v4', auth });
-    return sheets.spreadsheets.values.append({
+    const response = await sheets.spreadsheets.values.get({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.IncidentSheetName}'!A:C`,
+        range: Constants.IncidentRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    const emptyRowIndex = rows.slice(1).findIndex(row => !row[0] && !row[1]);
+    const rowNumber = emptyRowIndex >= 0 ? emptyRowIndex + 2 : rows.length + 1;
+
+    return sheets.spreadsheets.values.update({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: `'${Constants.IncidentSheetName}'!A${rowNumber}:C${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
         requestBody: {
             values: [[dateToSerial(incident.Datum), incident.VerkennerNaam, incident.Type]],
         },

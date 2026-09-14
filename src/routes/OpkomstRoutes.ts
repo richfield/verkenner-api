@@ -36,13 +36,14 @@ router.post('/incidents', async (req, res) => {
         return res.status(400).json({ error: 'Ongeldige incidentgegevens' });
     }
     try {
-        await spreadSheetService.addUniformIncident(req.auth, {
+        const result = await spreadSheetService.addUniformIncident(req.auth, {
             Datum: new Date(date),
             VerkennerNaam: verkennerNamen.map(name => name.trim()).join(', '),
             Type: type,
         });
-        res.status(201).json({ success: true });
-    } catch {
+        res.status(201).json({ success: true, updatedRange: result.data.updatedRange });
+    } catch (error) {
+        console.error('Fout bij opslaan van incident:', error);
         res.status(500).json({ error: 'Fout bij opslaan van incident' });
     }
 });
