@@ -166,6 +166,29 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
     });
 };
 
+export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIncident[]> => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.IncidentRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    return rows.slice(1).flatMap<UniformIncident>((row, index) => {
+        const name = typeof row[1] === 'string' ? row[1].trim() : '';
+        const type = row[2] === 'uniform' || row[2] === 'late' ? row[2] : undefined;
+        if (!name || !type) {
+            return [];
+        }
+        return [{
+            RowNumber: index + 2,
+            Datum: serialToDateUTC(Number(row[0])),
+            VerkennerNaam: name,
+            Type: type,
+        }];
+    });
+};
+
 export const getTraktaties = async (auth: OAuth2Client): Promise<Traktatie[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({

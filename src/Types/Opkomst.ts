@@ -17,6 +17,7 @@ export type Opkomst = {
 export type IncidentType = 'late' | 'uniform';
 
 export type UniformIncident = {
+    RowNumber?: number;
     Datum: Date;
     VerkennerNaam: string;
     Type: IncidentType;

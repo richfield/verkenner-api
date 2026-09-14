@@ -47,6 +47,17 @@ router.post('/incidents', async (req, res) => {
     }
 });
 
+router.get('/incidents', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+        res.status(200).json(await spreadSheetService.getUniformIncidents(req.auth));
+    } catch {
+        res.status(500).json({ error: 'Fout bij laden van incidenten' });
+    }
+});
+
 router.get('/traktaties', async (req, res) => {
     if (!req.auth) {
         return res.status(401).json({ error: 'Unauthorized' });
