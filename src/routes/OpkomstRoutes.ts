@@ -31,14 +31,14 @@ router.post('/incidents', async (req, res) => {
     if (!req.auth) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-    const { date, verkennerNaam, type } = req.body;
-    if (!date || !verkennerNaam || !['late', 'uniform'].includes(type)) {
+    const { date, verkennerNamen, type } = req.body;
+    if (!date || !Array.isArray(verkennerNamen) || verkennerNamen.length === 0 || !verkennerNamen.every(name => typeof name === 'string' && name.trim()) || !['late', 'uniform'].includes(type)) {
         return res.status(400).json({ error: 'Ongeldige incidentgegevens' });
     }
     try {
         await spreadSheetService.addUniformIncident(req.auth, {
             Datum: new Date(date),
-            VerkennerNaam: verkennerNaam,
+            VerkennerNaam: verkennerNamen.map(name => name.trim()).join(', '),
             Type: type,
         });
         res.status(201).json({ success: true });
