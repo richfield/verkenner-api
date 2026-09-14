@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
 import { Constants } from "../constants";
-import { Leiding, Opkomst, Verkenner } from "../Types";
+import { Leiding, Opkomst, Traktatie, UniformIncident, Verkenner } from "../Types";
 
 export const getOpkomsten = async (auth: OAuth2Client, history: true) => {
     const sheets = google.sheets({ version: 'v4', auth });
@@ -151,6 +151,53 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
     });
     const rows = response.data.values ?? [];
     return normalizeVerkenner(rows.slice(1));
+};
+
+export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIncident) => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    return sheets.spreadsheets.values.append({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: `'${Constants.IncidentSheetName}'!A:C`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+            values: [[incident.Datum, incident.VerkennerNaam, incident.Type]],
+        },
+    });
+};
+
+export const getTraktaties = async (auth: OAuth2Client): Promise<Traktatie[]> => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.TraktatieRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    return rows.slice(1).flatMap<Traktatie>((row, index) => {
+        const name = typeof row[0] === 'string' ? row[0].trim() : '';
+        if (!name) {
+            return [];
+        }
+        return [{
+            RowNumber: index + 2,
+            VerkennerNaam: name,
+            AantalKeerVergeten: Number(row[1]) || 0,
+            KerenOver: Number(row[2]) || 0,
+            Getrakteerd: row[3] === true || row[3] === 'TRUE',
+            Aantal: Number(row[4]) || 0,
+        }];
+    });
+};
+
+export const markTraktatieDone = async (auth: OAuth2Client, rowNumber: number, done: boolean) => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    return sheets.spreadsheets.values.update({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: `'${Constants.TraktatieSheetName}'!D${rowNumber}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [[done]] },
+    });
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

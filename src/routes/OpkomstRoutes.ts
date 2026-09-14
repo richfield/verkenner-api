@@ -27,19 +27,50 @@ router.post('/list', async (req: Request, res: Response) => {
     }
 });
 
-// Voorbeeld: API-route om een opkomst te updaten
-router.put('/:rowIndex', async (req, res) => {
+router.post('/incidents', async (req, res) => {
     if (!req.auth) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-    const { rowIndex } = req.params;
-    const updatedData = req.body;
-
+    const { date, verkennerNaam, type } = req.body;
+    if (!date || !verkennerNaam || !['late', 'uniform'].includes(type)) {
+        return res.status(400).json({ error: 'Ongeldige incidentgegevens' });
+    }
     try {
-        await updateOpkomst(req.auth, { ...updatedData, OpkomstId: rowIndex });
+        await spreadSheetService.addUniformIncident(req.auth, {
+            Datum: new Date(date),
+            VerkennerNaam: verkennerNaam,
+            Type: type,
+        });
+        res.status(201).json({ success: true });
+    } catch {
+        res.status(500).json({ error: 'Fout bij opslaan van incident' });
+    }
+});
+
+router.get('/traktaties', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+        res.status(200).json(await spreadSheetService.getTraktaties(req.auth));
+    } catch {
+        res.status(500).json({ error: 'Fout bij laden van traktaties' });
+    }
+});
+
+router.put('/traktaties/:rowNumber', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const rowNumber = Number(req.params.rowNumber);
+    if (!Number.isInteger(rowNumber) || rowNumber < 2 || typeof req.body.done !== 'boolean') {
+        return res.status(400).json({ error: 'Ongeldige traktatiegegevens' });
+    }
+    try {
+        await spreadSheetService.markTraktatieDone(req.auth, rowNumber, req.body.done);
         res.status(200).json({ success: true });
     } catch {
-        res.status(500).json({ error: 'Fout bij updaten van opkomst' });
+        res.status(500).json({ error: 'Fout bij opslaan van traktatie' });
     }
 });
 
@@ -57,6 +88,22 @@ router.get('/:rowIndex', async (req, res) => {
         }
     } catch {
         res.status(500).json({ error: 'Fout bij laden van opkomst' });
+    }
+});
+
+// Voorbeeld: API-route om een opkomst te updaten
+router.put('/:rowIndex', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { rowIndex } = req.params;
+    const updatedData = req.body;
+
+    try {
+        await updateOpkomst(req.auth, { ...updatedData, OpkomstId: rowIndex });
+        res.status(200).json({ success: true });
+    } catch {
+        res.status(500).json({ error: 'Fout bij updaten van opkomst' });
     }
 });
 

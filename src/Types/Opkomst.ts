@@ -13,3 +13,20 @@ export type Opkomst = {
     VerkennerAfwezig: Verkenner[]
     EerderWeg: Verkenner[]
 }
+
+export type IncidentType = 'late' | 'uniform';
+
+export type UniformIncident = {
+    Datum: Date;
+    VerkennerNaam: string;
+    Type: IncidentType;
+};
+
+export type Traktatie = {
+    RowNumber: number;
+    VerkennerNaam: string;
+    AantalKeerVergeten: number;
+    KerenOver: number;
+    Getrakteerd: boolean;
+    Aantal: number;
+};
