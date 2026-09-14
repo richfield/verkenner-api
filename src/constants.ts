@@ -6,6 +6,6 @@ export const Constants = {
     VerkennerRange: "Verkenners!A1:D100",
     IncidentSheetName: "Uniform vergeten/te laat",
     IncidentRange: "'Uniform vergeten/te laat'!A1:C1000",
-    TraktatieSheetName: "Traktatie",
-    TraktatieRange: "'Traktatie'!D1:H1000"
+    TraktatieSheetName: "Uniform vergeten/te laat",
+    TraktatieRange: "'Uniform vergeten/te laat'!D1:H1000"
 };
