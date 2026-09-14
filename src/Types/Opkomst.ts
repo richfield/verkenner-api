@@ -14,7 +14,7 @@ export type Opkomst = {
     EerderWeg: Verkenner[]
 }
 
-export type IncidentType = 'late' | 'uniform';
+export type IncidentType = 'late' | 'uniform' | 'unknown';
 
 export type UniformIncident = {
     RowNumber?: number;

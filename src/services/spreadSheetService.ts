@@ -175,17 +175,17 @@ export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIn
     });
     const rows = response.data.values ?? [];
     return rows.slice(1).flatMap<UniformIncident>((row, index) => {
-        const name = typeof row[1] === 'string' ? row[1].trim() : '';
-        const type = row[2] === 'uniform' || row[2] === 'late' ? row[2] : undefined;
-        if (!name || !type) {
+        const names = typeof row[1] === 'string' ? row[1].split(',').map(name => name.trim()).filter(Boolean) : [];
+        const type = row[2] === 'uniform' || row[2] === 'late' ? row[2] : 'unknown';
+        if (names.length === 0 || typeof row[0] !== 'number') {
             return [];
         }
-        return [{
-            RowNumber: index + 2,
+        return names.map((name, nameIndex) => ({
+            RowNumber: (index + 2) * 1000 + nameIndex,
             Datum: serialToDateUTC(Number(row[0])),
             VerkennerNaam: name,
             Type: type,
-        }];
+        }));
     });
 };
 
@@ -220,6 +220,19 @@ export const markTraktatieDone = async (auth: OAuth2Client, rowNumber: number, d
         range: `'${Constants.TraktatieSheetName}'!G${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[done]] },
+    });
+};
+
+export const addTraktatie = async (auth: OAuth2Client, verkennerNaam: string) => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    return sheets.spreadsheets.values.append({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: `'${Constants.TraktatieSheetName}'!D:H`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+            values: [[verkennerNaam, 0, 3, false, 0]],
+        },
     });
 };
 

@@ -86,6 +86,22 @@ router.put('/traktaties/:rowNumber', async (req, res) => {
     }
 });
 
+router.post('/traktaties', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const { verkennerNaam } = req.body;
+    if (typeof verkennerNaam !== 'string' || !verkennerNaam.trim()) {
+        return res.status(400).json({ error: 'Ongeldige verkenner' });
+    }
+    try {
+        await spreadSheetService.addTraktatie(req.auth, verkennerNaam.trim());
+        res.status(201).json({ success: true });
+    } catch {
+        res.status(500).json({ error: 'Fout bij toevoegen van traktatie' });
+    }
+});
+
 router.get('/:rowIndex', async (req, res) => {
     if (!req.auth) {
         return res.status(401).json({ error: 'Unauthorized' });
