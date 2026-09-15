@@ -169,7 +169,7 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
         range: `'${Constants.IncidentSheetName}'!A${rowNumber}:C${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[dateToSerial(incident.Datum), incident.VerkennerNaam, incident.Type]],
+            values: [[dateToSerial(incident.Datum), incident.VerkennerNaam, incident.Type === 'late' ? 'Te laat gekomen' : 'Uniform vergeten']],
         },
     });
 
@@ -204,7 +204,11 @@ export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIn
     const rows = response.data.values ?? [];
     return rows.slice(1).flatMap<UniformIncident>((row, index) => {
         const names = typeof row[1] === 'string' ? row[1].split(',').map(name => name.trim()).filter(Boolean) : [];
-        const type = row[2] === 'uniform' || row[2] === 'late' ? row[2] : 'unknown';
+        const type = row[2] === 'uniform' || row[2] === 'Uniform vergeten'
+            ? 'uniform'
+            : row[2] === 'late' || row[2] === 'Te laat gekomen'
+                ? 'late'
+                : 'unknown';
         if (names.length === 0 || typeof row[0] !== 'number') {
             return [];
         }
