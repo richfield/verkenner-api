@@ -32,4 +32,27 @@ router.get('/verkenners', async (req, res) => {
     }
 });
 
+router.put('/verkenners/:id', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const verkennerId = Number(req.params.id);
+    const { CWO, Vlet } = req.body;
+    if (!Number.isInteger(verkennerId) || verkennerId < 2 || typeof CWO !== 'string' || typeof Vlet !== 'string') {
+        return res.status(400).json({ error: 'Ongeldige verkennergegevens' });
+    }
+    try {
+        await spreadSheetService.updateVerkenner(req.auth, {
+            VerkennerId: verkennerId,
+            Naam: '',
+            CWO: CWO.trim(),
+            Vlet: Vlet.trim(),
+        });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Fout bij opslaan van verkenner:', error);
+        res.status(500).json({ error: 'Fout bij opslaan van verkenner' });
+    }
+});
+
 export default router;

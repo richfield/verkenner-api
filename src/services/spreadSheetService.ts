@@ -153,6 +153,18 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
     return normalizeVerkenner(rows.slice(1));
 };
 
+export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    return sheets.spreadsheets.values.update({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: `'${Constants.VerkennersSheetName}'!C${verkenner.VerkennerId}:D${verkenner.VerkennerId}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+            values: [[verkenner.CWO ?? '', verkenner.Vlet ?? '']],
+        },
+    });
+};
+
 export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIncident) => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
