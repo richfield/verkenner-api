@@ -188,7 +188,7 @@ const incrementAantalKeerVergeten = async (auth: OAuth2Client, verkennerNaam: st
     }
     await sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!E${traktatie.RowNumber}`,
+        range: `'${Constants.TraktatieSheetName}'!F${traktatie.RowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[traktatie.AantalKeerVergeten + 1]] },
     });
@@ -250,7 +250,7 @@ export const incrementTraktatie = async (auth: OAuth2Client, rowNumber: number) 
     }
     return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!G${rowNumber}`,
+        range: `'${Constants.TraktatieSheetName}'!H${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[traktatie.Getrakteerd + 1]] },
     });
@@ -265,7 +265,7 @@ export const resetTraktatie = async (auth: OAuth2Client, verkennerNaam: string) 
     }
     return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!G${traktatie.RowNumber}`,
+        range: `'${Constants.TraktatieSheetName}'!H${traktatie.RowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[false]] },
     });
