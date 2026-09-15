@@ -173,25 +173,7 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
         },
     });
 
-    const names = incident.VerkennerNaam.split(',').map(name => name.trim()).filter(Boolean);
-    await Promise.all(names.map(name => incrementAantalKeerVergeten(auth, name)));
-
     return result;
-};
-
-const incrementAantalKeerVergeten = async (auth: OAuth2Client, verkennerNaam: string) => {
-    const sheets = google.sheets({ version: 'v4', auth });
-    const traktaties = await getTraktaties(auth);
-    const traktatie = traktaties.find(item => item.VerkennerNaam === verkennerNaam);
-    if (!traktatie) {
-        return;
-    }
-    await sheets.spreadsheets.values.update({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.TraktatieSheetName}'!F${traktatie.RowNumber}`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[traktatie.AantalKeerVergeten + 1]] },
-    });
 };
 
 export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIncident[]> => {
