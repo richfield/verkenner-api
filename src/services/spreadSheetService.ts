@@ -153,6 +153,28 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
     return normalizeVerkenner(rows.slice(1));
 };
 
+export const getCwoOptions = async (auth: OAuth2Client): Promise<string[]> => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.CwoOptionsRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    return rows.slice(1).map(row => row[0]).filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+};
+
+export const getVletOptions = async (auth: OAuth2Client): Promise<string[]> => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.VletOptionsRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    return rows.slice(1).map(row => row[0]).filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+};
+
 export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({

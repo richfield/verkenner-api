@@ -32,6 +32,22 @@ router.get('/verkenners', async (req, res) => {
     }
 });
 
+router.get('/verkenner-options', async (req, res) => {
+    if (!req.auth) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+        const [cwoOptions, vletOptions] = await Promise.all([
+            spreadSheetService.getCwoOptions(req.auth),
+            spreadSheetService.getVletOptions(req.auth),
+        ]);
+        res.status(200).json({ cwoOptions, vletOptions });
+    } catch (error) {
+        console.error('Fout bij laden van verkenneropties:', error);
+        res.status(500).json({ error: 'Fout bij laden van verkenneropties' });
+    }
+});
+
 router.put('/verkenners/:id', async (req, res) => {
     if (!req.auth) {
         return res.status(401).json({ error: 'Unauthorized' });
