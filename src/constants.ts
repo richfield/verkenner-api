@@ -10,5 +10,6 @@ export const Constants = {
     TraktatieSheetName: "Uniform vergeten/te laat",
     TraktatieRange: "'Uniform vergeten/te laat'!E1:I1000",
     CwoOptionsRange: "'Data'!A1:A10",
-    VletOptionsRange: "'Vletten'!A1:A10"
+    VletOptionsRange: "'Vletten'!A1:A10",
+    FunctieOptionsRange: "'Data'!C1:C10"
 };

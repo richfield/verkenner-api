@@ -37,11 +37,12 @@ router.get('/verkenner-options', async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     try {
-        const [cwoOptions, vletOptions] = await Promise.all([
+        const [cwoOptions, vletOptions, functieOptions] = await Promise.all([
             spreadSheetService.getCwoOptions(req.auth),
             spreadSheetService.getVletOptions(req.auth),
+            spreadSheetService.getFunctieOptions(req.auth),
         ]);
-        res.status(200).json({ cwoOptions, vletOptions });
+        res.status(200).json({ cwoOptions, vletOptions, functieOptions });
     } catch (error) {
         console.error('Fout bij laden van verkenneropties:', error);
         res.status(500).json({ error: 'Fout bij laden van verkenneropties' });
@@ -53,14 +54,15 @@ router.put('/verkenners/:id', async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     const verkennerId = Number(req.params.id);
-    const { CWO, Vlet } = req.body;
-    if (!Number.isInteger(verkennerId) || verkennerId < 2 || typeof CWO !== 'string' || typeof Vlet !== 'string') {
+    const { Functie, CWO, Vlet } = req.body;
+    if (!Number.isInteger(verkennerId) || verkennerId < 2 || typeof Functie !== 'string' || typeof CWO !== 'string' || typeof Vlet !== 'string') {
         return res.status(400).json({ error: 'Ongeldige verkennergegevens' });
     }
     try {
         await spreadSheetService.updateVerkenner(req.auth, {
             VerkennerId: verkennerId,
             Naam: '',
+            Functie: Functie.trim(),
             CWO: CWO.trim(),
             Vlet: Vlet.trim(),
         });

@@ -175,14 +175,25 @@ export const getVletOptions = async (auth: OAuth2Client): Promise<string[]> => {
     return rows.slice(1).map(row => row[0]).filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
 };
 
+export const getFunctieOptions = async (auth: OAuth2Client): Promise<string[]> => {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        range: Constants.FunctieOptionsRange,
+        valueRenderOption: 'UNFORMATTED_VALUE',
+    });
+    const rows = response.data.values ?? [];
+    return rows.slice(1).map(row => row[0]).filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+};
+
 export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
         spreadsheetId: Constants.VerkennersSpreadSheetId,
-        range: `'${Constants.VerkennersSheetName}'!C${verkenner.VerkennerId}:D${verkenner.VerkennerId}`,
+        range: `'${Constants.VerkennersSheetName}'!B${verkenner.VerkennerId}:D${verkenner.VerkennerId}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[verkenner.CWO ?? '', verkenner.Vlet ?? '']],
+            values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '']],
         },
     });
 };
