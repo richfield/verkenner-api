@@ -1,6 +1,7 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 import opkomstRoutes from './routes/OpkomstRoutes';
 import metaDataRoutes from './routes/MetaDataRoutes';
 import authRoutes from './routes/Auth';
@@ -27,8 +28,13 @@ export const authenticate = async (
   }
 
   try {
-    const auth = new google.auth.OAuth2();
+    const auth = new google.auth.OAuth2() as OAuth2Client & { spreadsheetId?: string };
     auth.setCredentials({ access_token: token });
+    const spreadsheetId = req.header('X-Spreadsheet-Id');
+    if (!spreadsheetId || !/^[a-zA-Z0-9_-]{20,}$/.test(spreadsheetId)) {
+      return res.status(400).json({ error: 'Selecteer eerst een Google Sheet' });
+    }
+    auth.spreadsheetId = spreadsheetId;
     req.auth = auth;
     next();
   } catch {

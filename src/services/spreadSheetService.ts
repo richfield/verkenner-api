@@ -3,11 +3,18 @@ import { google } from "googleapis";
 import { Constants } from "../constants";
 import { Leiding, Opkomst, Traktatie, UniformIncident, Verkenner } from "../Types";
 
+const getSpreadsheetId = (auth: OAuth2Client & { spreadsheetId?: string }) => {
+    if (!auth.spreadsheetId) {
+        throw new Error('Geen spreadsheet geselecteerd');
+    }
+    return auth.spreadsheetId;
+};
+
 export const getOpkomsten = async (auth: OAuth2Client, history: true) => {
     const sheets = google.sheets({ version: 'v4', auth });
 
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.OpkomstRange,
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
@@ -25,7 +32,7 @@ export const getNextOpkomst = async (auth: OAuth2Client) => {
     const sheets = google.sheets({ version: 'v4', auth });
 
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.OpkomstRange,
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
@@ -40,7 +47,7 @@ export const getLeiding = async (auth: OAuth2Client) => {
     const sheets = google.sheets({ version: 'v4', auth });
 
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.LeidingRange,
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
@@ -56,7 +63,7 @@ export const updateOpkomst = async (auth: OAuth2Client, opkomst: Opkomst) => {
     try {
         const rowNumber = OpkomstId;
         const updated = await sheets.spreadsheets.values.update({
-            spreadsheetId: Constants.VerkennersSpreadSheetId,
+            spreadsheetId: getSpreadsheetId(auth),
             range: `'${Constants.OpkomstSheetName}'!A${rowNumber}:Z${rowNumber}`,
             valueInputOption: 'USER_ENTERED',
             requestBody: {
@@ -75,7 +82,7 @@ export const getOpkomst = async (auth: OAuth2Client, opkomstId: number) => {
     try {
         const rowNumber = opkomstId;
         const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: Constants.VerkennersSpreadSheetId,
+            spreadsheetId: getSpreadsheetId(auth),
             range: `'${Constants.OpkomstSheetName}'!A${rowNumber}:Z${rowNumber}`,
             valueRenderOption: 'UNFORMATTED_VALUE'
         });
@@ -145,7 +152,7 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
     const sheets = google.sheets({ version: 'v4', auth });
 
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.VerkennerRange,
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
@@ -156,7 +163,7 @@ export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> =>
 export const getCwoOptions = async (auth: OAuth2Client): Promise<string[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.CwoOptionsRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -167,7 +174,7 @@ export const getCwoOptions = async (auth: OAuth2Client): Promise<string[]> => {
 export const getVletOptions = async (auth: OAuth2Client): Promise<string[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.VletOptionsRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -178,7 +185,7 @@ export const getVletOptions = async (auth: OAuth2Client): Promise<string[]> => {
 export const getFunctieOptions = async (auth: OAuth2Client): Promise<string[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.FunctieOptionsRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -189,7 +196,7 @@ export const getFunctieOptions = async (auth: OAuth2Client): Promise<string[]> =
 export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: `'${Constants.VerkennersSheetName}'!B${verkenner.VerkennerId}:D${verkenner.VerkennerId}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
@@ -201,7 +208,7 @@ export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) 
 export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIncident) => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.IncidentRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -210,7 +217,7 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
     const rowNumber = emptyRowIndex >= 0 ? emptyRowIndex + 2 : rows.length + 1;
 
     const result = await sheets.spreadsheets.values.update({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: `'${Constants.IncidentSheetName}'!A${rowNumber}:C${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
@@ -224,7 +231,7 @@ export const addUniformIncident = async (auth: OAuth2Client, incident: UniformIn
 export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIncident[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.IncidentRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -251,7 +258,7 @@ export const getUniformIncidents = async (auth: OAuth2Client): Promise<UniformIn
 export const getTraktaties = async (auth: OAuth2Client): Promise<Traktatie[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: Constants.TraktatieRange,
         valueRenderOption: 'UNFORMATTED_VALUE',
     });
@@ -280,7 +287,7 @@ export const incrementTraktatie = async (auth: OAuth2Client, rowNumber: number) 
         throw new Error(`Geen traktatieregel gevonden voor rij ${rowNumber}`);
     }
     return sheets.spreadsheets.values.update({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: `'${Constants.TraktatieSheetName}'!H${rowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[traktatie.Getrakteerd + 1]] },
@@ -295,7 +302,7 @@ export const resetTraktatie = async (auth: OAuth2Client, verkennerNaam: string) 
         throw new Error(`Geen traktatieregel gevonden voor ${verkennerNaam}`);
     }
     return sheets.spreadsheets.values.update({
-        spreadsheetId: Constants.VerkennersSpreadSheetId,
+        spreadsheetId: getSpreadsheetId(auth),
         range: `'${Constants.TraktatieSheetName}'!H${traktatie.RowNumber}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [[false]] },
