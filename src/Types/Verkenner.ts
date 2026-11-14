@@ -3,5 +3,6 @@ export type Verkenner = {
     Naam: string,
     Functie?: string,
     CWO?: string,
-    Vlet: string
+    Vlet: string,
+    Document?: string
 }

@@ -197,10 +197,10 @@ export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) 
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
         spreadsheetId: getSpreadsheetId(auth),
-        range: `'${Constants.VerkennersSheetName}'!B${verkenner.VerkennerId}:D${verkenner.VerkennerId}`,
+        range: `'${Constants.VerkennersSheetName}'        !B${verkenner.VerkennerId}:E${verkenner.VerkennerId}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-            values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '']],
+                    values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '', verkenner.Document ?? '']],
         },
     });
 };
@@ -317,7 +317,8 @@ const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
             Naam: row[0].trim(),
             Functie: typeof row[1] === "string" ? row[1].trim() : "",
             CWO: typeof row[2] === "string" ? row[2].trim() : "",
-            Vlet: typeof row[3] === "string" ? row[3].trim() : ""
+            Vlet: typeof row[3] === "string" ? row[3].trim() : "",
+            Document: typeof row[4] === "string" ? row[4].trim() : ""
         };
     });
 };

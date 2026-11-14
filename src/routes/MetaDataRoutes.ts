@@ -54,9 +54,13 @@ router.put('/verkenners/:id', async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     const verkennerId = Number(req.params.id);
-    const { Functie, CWO, Vlet } = req.body;
-    if (!Number.isInteger(verkennerId) || verkennerId < 2 || typeof Functie !== 'string' || typeof CWO !== 'string' || typeof Vlet !== 'string') {
+    const { Functie, CWO, Vlet, Document = '' } = req.body;
+    if (!Number.isInteger(verkennerId) || verkennerId < 2 || typeof Functie !== 'string' || typeof CWO !== 'string' || typeof Vlet !== 'string' || typeof Document !== 'string') {
         return res.status(400).json({ error: 'Ongeldige verkennergegevens' });
+    }
+    const documentUrl = Document.trim();
+    if (documentUrl && !/^https?:\/\/\S+$/i.test(documentUrl)) {
+        return res.status(400).json({ error: 'Ongeldige stamkaartlink' });
     }
     try {
         await spreadSheetService.updateVerkenner(req.auth, {
@@ -65,6 +69,7 @@ router.put('/verkenners/:id', async (req, res) => {
             Functie: Functie.trim(),
             CWO: CWO.trim(),
             Vlet: Vlet.trim(),
+            Document: documentUrl,
         });
         res.status(200).json({ success: true });
     } catch (error) {
