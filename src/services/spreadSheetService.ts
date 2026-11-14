@@ -197,7 +197,7 @@ export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) 
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
         spreadsheetId: getSpreadsheetId(auth),
-        range: `'${Constants.VerkennersSheetName}'        !B${verkenner.VerkennerId}:E${verkenner.VerkennerId}`,
+        range: `'${Constants.VerkennersSheetName}'!B${verkenner.VerkennerId}:E${verkenner.VerkennerId}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
                     values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '', verkenner.Document ?? '']],
