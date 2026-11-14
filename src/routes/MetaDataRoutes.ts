@@ -74,7 +74,7 @@ router.put('/verkenners/:id', async (req, res) => {
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Fout bij opslaan van verkenner:', error);
-        res.status(500).json({ error: 'Fout bij opslaan van verkenner' });
+        res.status(500).json({ error: 'Fout bij opslaan van verkenner', detail: error instanceof Error ? error.message : String(error) });
     }
 });
 
