@@ -193,22 +193,7 @@ export const getFunctieOptions = async (auth: OAuth2Client): Promise<string[]> =
     return rows.slice(1).map(row => row[0]).filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
 };
 
-const ensureVerkennersColumns = async (auth: OAuth2Client, columns: number) => {
-    const sheets = google.sheets({ version: 'v4', auth });
-    const spreadsheetId = getSpreadsheetId(auth);
-    const meta = await sheets.spreadsheets.get({ spreadsheetId, fields: 'sheets.properties(sheetId,title,gridProperties.columnCount)' });
-    const sheet = meta.data.sheets?.find(s => s.properties?.title === Constants.VerkennersSheetName)?.properties;
-    const current = sheet?.gridProperties?.columnCount ?? columns;
-    if (sheet?.sheetId !== undefined && sheet.sheetId !== null && current < columns) {
-        await sheets.spreadsheets.batchUpdate({
-            spreadsheetId,
-            requestBody: { requests: [{ appendDimension: { sheetId: sheet.sheetId, dimension: 'COLUMNS', length: columns - current } }] },
-        });
-    }
-};
-
 export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
-    await ensureVerkennersColumns(auth, 5);
     const sheets = google.sheets({ version: 'v4', auth });
     return sheets.spreadsheets.values.update({
         spreadsheetId: getSpreadsheetId(auth),
