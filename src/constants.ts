@@ -3,8 +3,6 @@ export const Constants = {
     OpkomstSheetName: "Opkomsten",
     OpkomstRange: "'Opkomsten'!A1:H1000",
     LeidingRange: "'Leiding en Ondersteuning'!A1:E50",
-    VerkennersSheetName: "Verkenners",
-    VerkennerRange: "Verkenners!A1:E100",
     IncidentSheetName: "Uniform vergeten/te laat",
     IncidentRange: "'Uniform vergeten/te laat'!A1:C1000",
     TraktatieSheetName: "Uniform vergeten/te laat",

@@ -150,15 +150,34 @@ const normalizeLeiding = (rows: any[][]): Leiding[] => {
 };
 export const getVerkenners = async (auth: OAuth2Client): Promise<Verkenner[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = getSpreadsheetId(auth);
+    const sheetName = await getScoutSheetName(sheets, spreadsheetId);
 
     const response = await sheets.spreadsheets.values.get({
-        spreadsheetId: getSpreadsheetId(auth),
-        range: Constants.VerkennerRange,
+        spreadsheetId,
+        range: `${quoteSheetName(sheetName)}!A1:E100`,
         valueRenderOption: 'UNFORMATTED_VALUE', // raw numbers/booleans
     });
     const rows = response.data.values ?? [];
     return normalizeVerkenner(rows.slice(1));
 };
+
+const getScoutSheetName = async (sheets: ReturnType<typeof google.sheets>, spreadsheetId: string): Promise<string> => {
+    const response = await sheets.spreadsheets.get({
+        spreadsheetId,
+        fields: 'properties.title,sheets.properties.title',
+    });
+    const title = response.data.properties?.title;
+    if (!title) {
+        throw new Error('De naam van het spreadsheet ontbreekt');
+    }
+    if (!response.data.sheets?.some(sheet => sheet.properties?.title === title)) {
+        throw new Error(`Geen tabblad gevonden met de naam van het spreadsheet: ${title}`);
+    }
+    return title;
+};
+
+const quoteSheetName = (name: string): string => `'${name.replace(/'/g, "''")}'`;
 
 export const getCwoOptions = async (auth: OAuth2Client): Promise<string[]> => {
     const sheets = google.sheets({ version: 'v4', auth });
@@ -195,12 +214,14 @@ export const getFunctieOptions = async (auth: OAuth2Client): Promise<string[]> =
 
 export const updateVerkenner = async (auth: OAuth2Client, verkenner: Verkenner) => {
     const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = getSpreadsheetId(auth);
+    const sheetName = await getScoutSheetName(sheets, spreadsheetId);
     return sheets.spreadsheets.values.update({
-        spreadsheetId: getSpreadsheetId(auth),
-        range: `'${Constants.VerkennersSheetName}'!B${verkenner.VerkennerId}:E${verkenner.VerkennerId}`,
+        spreadsheetId,
+        range: `${quoteSheetName(sheetName)}!B${verkenner.VerkennerId}:E${verkenner.VerkennerId}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-                    values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '', verkenner.Document ?? '']],
+            values: [[verkenner.Functie ?? '', verkenner.CWO ?? '', verkenner.Vlet ?? '', verkenner.Document ?? '']],
         },
     });
 };
@@ -322,4 +343,3 @@ const normalizeVerkenner = (rows: any[][]): Verkenner[] => {
         };
     });
 };
-
